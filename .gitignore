@@ -1,0 +1,39 @@
+## Build & Output
+bin/
+obj/
+out/
+dist/
+node_modules/
+TestResults/
+*.log
+
+## Visual Studio & VS Code
+.vs/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+
+## Rider & JetBrains
+.idea/
+*.sln.iml
+
+## OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+## NuGet & Packages
+*.nupkg
+*.snupkg
+packages/
+project.lock.json
+project.assets.json
+
+## Antigravity / Gemini logs
+.gemini/
+.system_generated/

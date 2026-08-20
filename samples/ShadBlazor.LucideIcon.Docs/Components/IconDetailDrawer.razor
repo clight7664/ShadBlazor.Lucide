@@ -1,0 +1,141 @@
+@namespace ShadBlazor.LucideIcon.Docs.Components
+@using ShadBlazor.LucideIcon
+@using ShadBlazor.LucideIcon.Base
+@using ShadBlazor.LucideIcon.Docs.Services
+@inject IJSRuntime JS
+@inject I18nService I18n
+@implements IDisposable
+
+@if (IsOpen && IconModel != null)
+{
+    <div class="drawer-overlay" @onclick="Close">
+        <div class="drawer-panel" @onclick:stopPropagation>
+            <div class="drawer-header">
+                <div>
+                    <h3 class="drawer-title">@IconModel.PascalName</h3>
+                    <span class="drawer-subtitle">Name: "@IconModel.Name"</span>
+                </div>
+                <button class="close-btn" @onclick="Close">✕</button>
+            </div>
+
+            <div class="preview-box">
+                <LucideIcon Name="@IconModel.Name" Size="64" StrokeWidth="@StrokeWidth" Color="@Color" />
+            </div>
+
+            <div class="action-list">
+                <button class="copy-action-btn" @onclick="CopyComponentTag">
+                    <span class="btn-icon">📋</span>
+                    <div class="btn-text">
+                        <strong>@I18n.T("Drawer.CopyStrongTag")</strong>
+                        <code>&lt;Lucide@(IconModel.PascalName) Size="@(Size)" /&gt;</code>
+                    </div>
+                </button>
+
+                <button class="copy-action-btn" @onclick="CopyDynamicTag">
+                    <span class="btn-icon">📋</span>
+                    <div class="btn-text">
+                        <strong>@I18n.T("Drawer.CopyDynamicTag")</strong>
+                        <code>&lt;LucideIcon Name="@IconModel.Name" Size="@(Size)" /&gt;</code>
+                    </div>
+                </button>
+
+                <button class="copy-action-btn" @onclick="CopySvgMarkup">
+                    <span class="btn-icon">⚡</span>
+                    <div class="btn-text">
+                        <strong>@I18n.T("Drawer.CopySvg")</strong>
+                        <code>&lt;svg xmlns="..."&gt;...&lt;/svg&gt;</code>
+                    </div>
+                </button>
+            </div>
+
+            <div class="tags-section">
+                <span class="tags-label">@I18n.T("Drawer.Tags")</span>
+                <div class="tags-container">
+                    @foreach (var tag in IconModel.Tags)
+                    {
+                        <span class="tag-badge">@tag</span>
+                    }
+                </div>
+            </div>
+
+            <div class="tags-section">
+                <span class="tags-label">@I18n.T("Drawer.Categories")</span>
+                <div class="tags-container">
+                    @foreach (var cat in IconModel.Categories)
+                    {
+                        <span class="tag-badge" style="border-color: var(--accent-color); color: var(--accent-color);">
+                            @I18n.GetCategoryName(cat)
+                        </span>
+                    }
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(CopyAlert))
+            {
+                <div class="alert-success">
+                    ✓ @CopyAlert
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public LucideIconModel? IconModel { get; set; }
+    [Parameter] public int Size { get; set; } = 24;
+    [Parameter] public double StrokeWidth { get; set; } = 2.0;
+    [Parameter] public string Color { get; set; } = "currentColor";
+
+    private string? CopyAlert;
+
+    protected override void OnInitialized()
+    {
+        I18n.OnLanguageChanged += HandleLanguageChanged;
+    }
+
+    private void HandleLanguageChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task Close()
+    {
+        IsOpen = false;
+        CopyAlert = null;
+        await IsOpenChanged.InvokeAsync(false);
+    }
+
+    private async Task CopyComponentTag()
+    {
+        var code = $"<Lucide{IconModel!.PascalName} Size=\"{Size}\" />";
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", code);
+        ShowAlert(I18n.T("Toast.CopiedTag", IconModel!.PascalName));
+    }
+
+    private async Task CopyDynamicTag()
+    {
+        var code = $"<LucideIcon Name=\"{IconModel!.Name}\" Size=\"{Size}\" />";
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", code);
+        ShowAlert(I18n.T("Toast.CopiedName", IconModel!.Name));
+    }
+
+    private async Task CopySvgMarkup()
+    {
+        var code = $"<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{Size}\" height=\"{Size}\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"{Color}\" stroke-width=\"{StrokeWidth}\" stroke-linecap=\"round\" stroke-linejoin=\"round\">{IconModel!.SvgMarkup}</svg>";
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", code);
+        ShowAlert(I18n.T("Toast.CopiedSvg", IconModel!.Name));
+    }
+
+    private void ShowAlert(string msg)
+    {
+        CopyAlert = msg;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        I18n.OnLanguageChanged -= HandleLanguageChanged;
+    }
+}

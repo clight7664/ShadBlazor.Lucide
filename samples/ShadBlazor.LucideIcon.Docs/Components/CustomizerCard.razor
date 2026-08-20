@@ -1,0 +1,164 @@
+@namespace ShadBlazor.LucideIcon.Docs.Components
+@using ShadBlazor.LucideIcon
+@using ShadBlazor.LucideIcon.Docs.Services
+@inject I18nService I18n
+@implements IDisposable
+
+<div class="customizer-card">
+    <div class="customizer-header">
+        <span class="customizer-title">@I18n.T("Customizer.Title")</span>
+        <button type="button" class="reset-btn" @onclick="ResetDefaults" title="@I18n.T("Customizer.Reset")">
+            <LucideRotateCcw Size="15" />
+        </button>
+    </div>
+
+    <!-- Color -->
+    <div class="customizer-item">
+        <div class="customizer-item-header">
+            <span>@I18n.T("Customizer.Color")</span>
+        </div>
+        <div class="color-control-box">
+            <div class="color-preview-bar">
+                <input type="color" class="color-native-input" value="@GetColorHex(Color)" @onchange="OnColorInputChange" />
+                <span class="color-display-val">@(Color == "currentColor" ? "currentColor" : Color)</span>
+            </div>
+            <div class="color-swatches">
+                @foreach (var c in PresetColors)
+                {
+                    <button type="button"
+                            class="color-swatch-dot @(Color == c ? "active" : "")"
+                            style="background: @(c == "currentColor" ? "var(--text-main)" : c);"
+                            @onclick="() => SetColor(c)"
+                            title="@c">
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Stroke width -->
+    <div class="customizer-item">
+        <div class="customizer-item-header">
+            <span>@I18n.T("Customizer.StrokeWidth")</span>
+            <span class="customizer-val">@(StrokeWidth.ToString("0.##"))px</span>
+        </div>
+        <input type="range" min="0.5" max="3.0" step="0.25" value="@StrokeWidth" @oninput="OnStrokeWidthInput" class="customizer-slider" />
+    </div>
+
+    <!-- Size -->
+    <div class="customizer-item">
+        <div class="customizer-item-header">
+            <span>@I18n.T("Customizer.Size")</span>
+            <span class="customizer-val">@(Size)px</span>
+        </div>
+        <input type="range" min="16" max="64" step="4" value="@Size" @oninput="OnSizeInput" class="customizer-slider" />
+    </div>
+
+    <!-- Absolute stroke width -->
+    <div class="customizer-item switch-row">
+        <div class="switch-info">
+            <span class="switch-label">@I18n.T("Customizer.AbsoluteStroke")</span>
+        </div>
+        <label class="switch">
+            <input type="checkbox" checked="@AbsoluteStrokeWidth" @onchange="OnAbsoluteStrokeWidthChanged" />
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int Size { get; set; } = 24;
+    [Parameter] public EventCallback<int> SizeChanged { get; set; }
+
+    [Parameter] public double StrokeWidth { get; set; } = 2.0;
+    [Parameter] public EventCallback<double> StrokeWidthChanged { get; set; }
+
+    [Parameter] public string Color { get; set; } = "currentColor";
+    [Parameter] public EventCallback<string> ColorChanged { get; set; }
+
+    [Parameter] public bool AbsoluteStrokeWidth { get; set; } = false;
+    [Parameter] public EventCallback<bool> AbsoluteStrokeWidthChanged { get; set; }
+
+    private readonly string[] PresetColors = new[]
+    {
+        "currentColor", "#000000", "#ffffff", "#f43f5e", "#3b82f6", "#10b981", "#f59e0b", "#a855f7"
+    };
+
+    protected override void OnInitialized()
+    {
+        I18n.OnLanguageChanged += HandleLanguageChanged;
+    }
+
+    private void HandleLanguageChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private string GetColorHex(string color)
+    {
+        if (string.IsNullOrEmpty(color) || color == "currentColor") return "#000000";
+        if (color.StartsWith("#") && (color.Length == 7 || color.Length == 4)) return color;
+        return "#000000";
+    }
+
+    private async Task SetColor(string color)
+    {
+        Color = color;
+        await ColorChanged.InvokeAsync(Color);
+    }
+
+    private async Task OnColorInputChange(ChangeEventArgs e)
+    {
+        var hex = e.Value?.ToString();
+        if (!string.IsNullOrEmpty(hex))
+        {
+            Color = hex;
+            await ColorChanged.InvokeAsync(Color);
+        }
+    }
+
+    private async Task OnSizeInput(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var newSize))
+        {
+            Size = newSize;
+            await SizeChanged.InvokeAsync(Size);
+        }
+    }
+
+    private async Task OnStrokeWidthInput(ChangeEventArgs e)
+    {
+        if (double.TryParse(e.Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var newStroke))
+        {
+            StrokeWidth = newStroke;
+            await StrokeWidthChanged.InvokeAsync(StrokeWidth);
+        }
+    }
+
+    private async Task OnAbsoluteStrokeWidthChanged(ChangeEventArgs e)
+    {
+        if (e.Value is bool isChecked)
+        {
+            AbsoluteStrokeWidth = isChecked;
+            await AbsoluteStrokeWidthChanged.InvokeAsync(AbsoluteStrokeWidth);
+        }
+    }
+
+    private async Task ResetDefaults()
+    {
+        Size = 24;
+        StrokeWidth = 2.0;
+        Color = "currentColor";
+        AbsoluteStrokeWidth = false;
+
+        await SizeChanged.InvokeAsync(Size);
+        await StrokeWidthChanged.InvokeAsync(StrokeWidth);
+        await ColorChanged.InvokeAsync(Color);
+        await AbsoluteStrokeWidthChanged.InvokeAsync(AbsoluteStrokeWidth);
+    }
+
+    public void Dispose()
+    {
+        I18n.OnLanguageChanged -= HandleLanguageChanged;
+    }
+}

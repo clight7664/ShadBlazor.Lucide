@@ -1,0 +1,31 @@
+@page "/packages"
+@using ShadBlazor.LucideIcon
+
+<PageTitle>Packages - ShadBlazor Ecosystem</PageTitle>
+
+<div class="packages-container">
+    <div class="hero-section" style="padding-top: 2rem;">
+        <h1 class="hero-title">Official Packages</h1>
+        <p class="hero-desc">ShadBlazor 官方生态包与周边工具矩阵</p>
+    </div>
+
+    <div class="packages-grid">
+        <div class="pkg-card">
+            <div class="pkg-header">
+                <LucideSparkles Size="28" Color="var(--accent-color)" />
+                <h3>ShadBlazor.LucideIcon</h3>
+            </div>
+            <p>1,770+ 核心矢量图标组件库，兼容 .NET 6.0/7.0/8.0/9.0 与 AOT。</p>
+            <div class="pkg-install"><code>dotnet add package ShadBlazor.LucideIcon</code></div>
+        </div>
+
+        <div class="pkg-card">
+            <div class="pkg-header">
+                <LucideCpu Size="28" Color="var(--accent-color)" />
+                <h3>ShadBlazor.LucideIcon.Generator</h3>
+            </div>
+            <p>自动同步官方最新 Lucide SVG 资源的 CLI 代码生成引擎。</p>
+            <div class="pkg-install"><code>dotnet run --project src/ShadBlazor.LucideIcon.Generator</code></div>
+        </div>
+    </div>
+</div>

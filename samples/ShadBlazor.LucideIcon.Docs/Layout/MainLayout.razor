@@ -1,0 +1,17 @@
+@inherits LayoutComponentBase
+
+<div class="app-layout @CurrentTheme">
+    <Header Theme="@CurrentTheme" OnToggleTheme="ToggleTheme" />
+    <main class="main-content">
+        @Body
+    </main>
+</div>
+
+@code {
+    private string CurrentTheme = "dark";
+
+    private void ToggleTheme()
+    {
+        CurrentTheme = CurrentTheme == "dark" ? "light" : "dark";
+    }
+}

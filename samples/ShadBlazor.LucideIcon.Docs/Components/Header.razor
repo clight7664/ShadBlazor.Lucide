@@ -1,0 +1,74 @@
+@namespace ShadBlazor.LucideIcon.Docs.Components
+@using ShadBlazor.LucideIcon
+@using ShadBlazor.LucideIcon.Docs.Services
+@inject I18nService I18n
+@implements IDisposable
+
+<header class="lucide-header">
+    <div class="brand">
+        <a href="" class="brand-link">
+            <div class="logo-box">
+                <LucideSparkles Size="20" Color="#ffffff" />
+            </div>
+            <span class="brand-name">ShadBlazor.Lucide</span>
+        </a>
+        <span class="version-badge">v1.33.0 (.NET 6+)</span>
+    </div>
+
+    <nav class="nav-links">
+        <NavLink href="" Match="NavLinkMatch.All" class="nav-link">@I18n.T("Nav.Icons")</NavLink>
+        <NavLink href="guide" class="nav-link">@I18n.T("Nav.Guide")</NavLink>
+        <NavLink href="packages" class="nav-link">@I18n.T("Nav.Packages")</NavLink>
+        <NavLink href="showcase" class="nav-link">@I18n.T("Nav.Showcase")</NavLink>
+    </nav>
+
+    <div class="header-actions">
+        <!-- Language Switcher -->
+        <button class="icon-action-btn lang-btn" @onclick="ToggleLanguage" title="@(I18n.IsZh ? "Switch to English" : "切换为中文")">
+            <LucideLanguages Size="17" />
+            <span class="lang-text">@(I18n.IsZh ? "EN" : "中")</span>
+        </button>
+
+        <!-- Theme Switcher -->
+        <button class="icon-action-btn" @onclick="OnToggleTheme" title="@I18n.T("Nav.ToggleTheme")">
+            @if (Theme == "dark")
+            {
+                <LucideSun Size="18" />
+            }
+            else
+            {
+                <LucideMoon Size="18" />
+            }
+        </button>
+
+        <!-- GitHub -->
+        <a href="https://github.com/ShadBlazor/ShadBlazor.LucideIcon" target="_blank" class="icon-action-btn" title="GitHub Repository">
+            <LucideGitFork Size="18" />
+        </a>
+    </div>
+</header>
+
+@code {
+    [Parameter] public string Theme { get; set; } = "dark";
+    [Parameter] public EventCallback OnToggleTheme { get; set; }
+
+    protected override void OnInitialized()
+    {
+        I18n.OnLanguageChanged += HandleLanguageChanged;
+    }
+
+    private void ToggleLanguage()
+    {
+        I18n.ToggleLanguage();
+    }
+
+    private void HandleLanguageChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        I18n.OnLanguageChanged -= HandleLanguageChanged;
+    }
+}

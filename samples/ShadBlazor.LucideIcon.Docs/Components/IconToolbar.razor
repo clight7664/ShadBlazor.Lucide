@@ -1,0 +1,90 @@
+@namespace ShadBlazor.LucideIcon.Docs.Components
+@using ShadBlazor.LucideIcon
+
+<div class="toolbar-box">
+    <div class="tool-item">
+        <span class="tool-label">Size</span>
+        <input type="range" min="16" max="64" step="4" value="@Size" @oninput="OnSizeInput" class="slider" />
+        <span class="tool-value">@(Size)px</span>
+    </div>
+
+    <div class="tool-item">
+        <span class="tool-label">Stroke</span>
+        <input type="range" min="0.5" max="3.0" step="0.25" value="@StrokeWidth" @oninput="OnStrokeWidthInput" class="slider" />
+        <span class="tool-value">@(StrokeWidth)</span>
+    </div>
+
+    <div class="tool-item">
+        <span class="tool-label">Color</span>
+        <div class="color-palette">
+            @foreach (var c in PresetColors)
+            {
+                <div @onclick="() => SetColor(c)"
+                     class="color-dot @(Color == c ? "selected" : "")"
+                     style="background: @(c == "currentColor" ? "var(--text-main)" : c);"
+                     title="@c">
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="tool-item view-mode-group">
+        <span class="tool-label">View</span>
+        <div class="view-mode-toggle">
+            <button type="button" class="view-mode-btn @(ViewMode == "grid" ? "active" : "")" @onclick="@(() => SetViewMode("grid"))" title="Card Grid View">
+                <LucideLayoutGrid Size="15" />
+                <span>Card</span>
+            </button>
+            <button type="button" class="view-mode-btn @(ViewMode == "list" ? "active" : "")" @onclick="@(() => SetViewMode("list"))" title="Table List View">
+                <LucideList Size="15" />
+                <span>List</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int Size { get; set; } = 28;
+    [Parameter] public EventCallback<int> SizeChanged { get; set; }
+
+    [Parameter] public double StrokeWidth { get; set; } = 2.0;
+    [Parameter] public EventCallback<double> StrokeWidthChanged { get; set; }
+
+    [Parameter] public string Color { get; set; } = "currentColor";
+    [Parameter] public EventCallback<string> ColorChanged { get; set; }
+
+    [Parameter] public string ViewMode { get; set; } = "grid";
+    [Parameter] public EventCallback<string> ViewModeChanged { get; set; }
+
+    private readonly string[] PresetColors = new[] { "currentColor", "#f43f5e", "#3b82f6", "#10b981", "#f59e0b", "#a855f7" };
+
+    private async Task SetColor(string color)
+    {
+        Color = color;
+        await ColorChanged.InvokeAsync(Color);
+    }
+
+    private async Task SetViewMode(string mode)
+    {
+        ViewMode = mode;
+        await ViewModeChanged.InvokeAsync(ViewMode);
+    }
+
+    private async Task OnSizeInput(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var newSize))
+        {
+            Size = newSize;
+            await SizeChanged.InvokeAsync(Size);
+        }
+    }
+
+    private async Task OnStrokeWidthInput(ChangeEventArgs e)
+    {
+        if (double.TryParse(e.Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var newStroke))
+        {
+            StrokeWidth = newStroke;
+            await StrokeWidthChanged.InvokeAsync(StrokeWidth);
+        }
+    }
+}

@@ -1,0 +1,352 @@
+@page "/"
+@page "/icons"
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using ShadBlazor.LucideIcon
+@using ShadBlazor.LucideIcon.Base
+@using ShadBlazor.LucideIcon.Docs.Components
+@using ShadBlazor.LucideIcon.Docs.Services
+@inject IJSRuntime JS
+@inject I18nService I18n
+@implements IDisposable
+
+<PageTitle>ShadBlazor.LucideIcon - Beautiful & Consistent Icons for Blazor</PageTitle>
+
+<div class="icons-explorer-container">
+    <!-- Left Sticky Sidebar with Fixed Height -->
+    <aside class="category-sidebar">
+        <!-- Customizer Card -->
+        <CustomizerCard Size="@GlobalSize" SizeChanged="OnGlobalSizeChanged"
+                        StrokeWidth="@GlobalStroke" StrokeWidthChanged="OnGlobalStrokeChanged"
+                        Color="@GlobalColor" ColorChanged="OnGlobalColorChanged"
+                        AbsoluteStrokeWidth="@GlobalAbsoluteStroke" AbsoluteStrokeWidthChanged="OnGlobalAbsoluteStrokeChanged" />
+
+        <!-- View & Categories Section -->
+        <div class="sidebar-nav-section">
+            <div class="sidebar-section-title">@I18n.T("Sidebar.View")</div>
+            <div class="category-item @(SelectedCategory == "All" ? "active" : "")" @onclick='() => SelectCategory("All")'>
+                <span class="cat-name">@I18n.T("Sidebar.All")</span>
+                <span class="cat-count">@AllIcons.Count</span>
+            </div>
+        </div>
+
+        <div class="sidebar-nav-section">
+            <div class="sidebar-section-title">@I18n.T("Sidebar.Categories")</div>
+            <ul class="category-list">
+                @foreach (var cat in DisplayCategories)
+                {
+                    var count = GetCategoryCount(cat);
+                    <li class="category-item @(SelectedCategory == cat ? "active" : "")" @onclick="() => SelectCategory(cat)">
+                        <span class="cat-name">@I18n.GetCategoryName(cat)</span>
+                        <span class="cat-count">@count</span>
+                    </li>
+                }
+            </ul>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <section class="explorer-main">
+        <!-- Sticky Search, Sort & Stats Bar -->
+        <div class="search-top-bar-sticky">
+            <div class="search-top-bar">
+                <div class="search-input-box">
+                    <LucideSearch Size="18" Color="var(--text-muted)" Class="search-icon" />
+                    <input class="search-input"
+                           placeholder="@I18n.T("Search.Placeholder")"
+                           @bind="SearchText"
+                           @bind:event="oninput" />
+                    @if (!string.IsNullOrEmpty(SearchText))
+                    {
+                        <button class="clear-search-btn" @onclick="() => SearchText = string.Empty" title="@I18n.T("Search.Clear")">✕</button>
+                    }
+                </div>
+
+                <div class="top-bar-controls">
+                    <div class="sort-selector">
+                        <select @bind="SortBy" class="sort-dropdown">
+                            <option value="popularity">@I18n.T("Sort.Popularity")</option>
+                            <option value="name">@I18n.T("Sort.NameAZ")</option>
+                            <option value="category">@I18n.T("Sort.Category")</option>
+                        </select>
+                    </div>
+
+                    <div class="view-mode-toggle">
+                        <button type="button" class="view-mode-btn @(ViewMode == "grid" ? "active" : "")" @onclick='() => ViewMode = "grid"' title="@I18n.T("View.Card")">
+                            <LucideLayoutGrid Size="16" />
+                        </button>
+                        <button type="button" class="view-mode-btn @(ViewMode == "list" ? "active" : "")" @onclick='() => ViewMode = "list"' title="@I18n.T("View.List")">
+                            <LucideList Size="16" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Stats & Tags -->
+            <div class="results-stats">
+                <span>@((MarkupString)I18n.T("Stats.Showing", FilteredIconsList.Count, AllIcons.Count))</span>
+                @if (SelectedCategory != "All")
+                {
+                    <span class="filter-pill">
+                        @I18n.T("Stats.CategoryFilter", I18n.GetCategoryName(SelectedCategory))
+                        <button @onclick='() => SelectCategory("All")'>✕</button>
+                    </span>
+                }
+                @if (!string.IsNullOrWhiteSpace(SearchText))
+                {
+                    <span class="filter-pill">
+                        @I18n.T("Stats.SearchFilter", SearchText)
+                        <button @onclick="() => SearchText = string.Empty">✕</button>
+                    </span>
+                }
+            </div>
+        </div>
+
+        <!-- Virtualized Icon Area -->
+        <div class="virtualized-scroll-container">
+            @if (FilteredIconsList.Count == 0)
+            {
+                <div class="empty-state">
+                    <LucideSearchX Size="48" Color="var(--text-muted)" />
+                    <p class="empty-title">@I18n.T("Stats.EmptyTitle")</p>
+                    <p class="empty-desc">@I18n.T("Stats.EmptyDesc")</p>
+                </div>
+            }
+            else if (ViewMode == "grid")
+            {
+                <div class="icon-grid-virtualized">
+                    <Virtualize Items="ChunkedIcons" Context="row" ItemSize="125" OverscanCount="4">
+                        <div class="icon-grid-row">
+                            @foreach (var icon in row)
+                            {
+                                <div class="icon-card" @onclick="() => SelectIcon(icon)" title="@icon.Name (@icon.PascalName)">
+                                    <div class="icon-wrapper">
+                                        <LucideIcon Name="@icon.Name"
+                                                    Size="@GlobalSize"
+                                                    StrokeWidth="@GlobalStroke"
+                                                    Color="@GlobalColor"
+                                                    AbsoluteStrokeWidth="@GlobalAbsoluteStroke" />
+                                    </div>
+                                    <span class="icon-name">@icon.Name</span>
+                                </div>
+                            }
+                        </div>
+                    </Virtualize>
+                </div>
+            }
+            else
+            {
+                <div class="icon-list-virtualized">
+                    <div class="icon-list-header">
+                        <span class="col-icon">@I18n.T("List.ColIcon")</span>
+                        <span class="col-name">@I18n.T("List.ColName")</span>
+                        <span class="col-tags">@I18n.T("List.ColTags")</span>
+                        <span class="col-actions">@I18n.T("List.ColActions")</span>
+                    </div>
+                    <Virtualize Items="FilteredIconsList" Context="icon" ItemSize="68" OverscanCount="6">
+                        <div class="icon-list-row" @onclick="() => SelectIcon(icon)">
+                            <div class="col-icon list-icon-box">
+                                <LucideIcon Name="@icon.Name"
+                                            Size="@GlobalSize"
+                                            StrokeWidth="@GlobalStroke"
+                                            Color="@GlobalColor"
+                                            AbsoluteStrokeWidth="@GlobalAbsoluteStroke" />
+                            </div>
+                            <div class="col-name list-icon-meta">
+                                <span class="list-name">@icon.Name</span>
+                                <code class="list-code">&lt;Lucide@(icon.PascalName) /&gt;</code>
+                            </div>
+                            <div class="col-tags list-icon-tags">
+                                @foreach (var cat in icon.Categories.Take(2))
+                                {
+                                    <span class="cat-tag">@I18n.GetCategoryName(cat)</span>
+                                }
+                                @foreach (var tag in icon.Tags.Take(4))
+                                {
+                                    <span class="meta-tag">@tag</span>
+                                }
+                            </div>
+                            <div class="col-actions list-actions" @onclick:stopPropagation>
+                                <button class="mini-action-btn" title="Copy Component Tag" @onclick="() => CopyComponentTag(icon)">
+                                    <LucideCopy Size="14" />
+                                    <span>@I18n.T("List.ActionTag")</span>
+                                </button>
+                                <button class="mini-action-btn" title="Copy Name" @onclick="() => CopyName(icon)">
+                                    <LucideFileText Size="14" />
+                                    <span>@I18n.T("List.ActionName")</span>
+                                </button>
+                                <button class="mini-action-btn" title="Copy SVG" @onclick="() => CopySvg(icon)">
+                                    <LucideCode Size="14" />
+                                    <span>@I18n.T("List.ActionSvg")</span>
+                                </button>
+                            </div>
+                        </div>
+                    </Virtualize>
+                </div>
+            }
+        </div>
+    </section>
+</div>
+
+<IconDetailDrawer @bind-IsOpen="IsDrawerOpen"
+                  IconModel="SelectedIcon"
+                  Size="@GlobalSize"
+                  StrokeWidth="@GlobalStroke"
+                  Color="@GlobalColor" />
+
+@if (!string.IsNullOrEmpty(ToastMessage))
+{
+    <div class="toast-notification">
+        <LucideCheck Size="16" Color="#10b981" />
+        <span>@ToastMessage</span>
+    </div>
+}
+
+@code {
+    private string SearchText = "";
+    private string SelectedCategory = "All";
+    private string SortBy = "popularity";
+    private string ViewMode = "grid";
+
+    private int GlobalSize = 24;
+    private double GlobalStroke = 2.0;
+    private string GlobalColor = "currentColor";
+    private bool GlobalAbsoluteStroke = false;
+
+    private bool IsDrawerOpen = false;
+    private LucideIconModel? SelectedIcon;
+    private string? ToastMessage;
+    private System.Threading.CancellationTokenSource? _toastCts;
+
+    private IReadOnlyList<LucideIconModel> AllIcons = Array.Empty<LucideIconModel>();
+    private IReadOnlyList<string> CategoriesList = Array.Empty<string>();
+
+    private const int GridColumns = 8;
+
+    protected override void OnInitialized()
+    {
+        AllIcons = LucideRegistry.GetAllIcons();
+        CategoriesList = LucideRegistry.Categories;
+        I18n.OnLanguageChanged += HandleLanguageChanged;
+    }
+
+    private void HandleLanguageChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private IEnumerable<string> DisplayCategories => CategoriesList.Where(c => c != "All");
+
+    private void OnGlobalSizeChanged(int newSize) => GlobalSize = newSize;
+    private void OnGlobalStrokeChanged(double newStroke) => GlobalStroke = newStroke;
+    private void OnGlobalColorChanged(string newColor) => GlobalColor = newColor;
+    private void OnGlobalAbsoluteStrokeChanged(bool isAbs) => GlobalAbsoluteStroke = isAbs;
+
+    private int GetCategoryCount(string category)
+    {
+        if (category == "All") return AllIcons.Count;
+        return AllIcons.Count(i => i.Categories.Contains(category, StringComparer.OrdinalIgnoreCase));
+    }
+
+    private void SelectCategory(string cat)
+    {
+        SelectedCategory = cat;
+    }
+
+    private List<LucideIconModel> FilteredIconsList
+    {
+        get
+        {
+            var query = AllIcons.AsEnumerable();
+
+            if (SelectedCategory != "All")
+            {
+                query = query.Where(i => i.Categories.Contains(SelectedCategory, StringComparer.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(SearchText))
+            {
+                query = query.Where(i => i.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                         i.PascalName.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                         i.Tags.Any(t => t.Contains(SearchText, StringComparison.OrdinalIgnoreCase)) ||
+                                         i.Categories.Any(c => I18n.GetCategoryName(c).Contains(SearchText, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            if (SortBy == "name")
+            {
+                query = query.OrderBy(i => i.Name);
+            }
+            else if (SortBy == "category")
+            {
+                query = query.OrderBy(i => i.Categories.FirstOrDefault() ?? "").ThenBy(i => i.Name);
+            }
+
+            return query.ToList();
+        }
+    }
+
+    private List<List<LucideIconModel>> ChunkedIcons
+    {
+        get
+        {
+            var list = FilteredIconsList;
+            var rows = new List<List<LucideIconModel>>();
+            for (int i = 0; i < list.Count; i += GridColumns)
+            {
+                rows.Add(list.Skip(i).Take(GridColumns).ToList());
+            }
+            return rows;
+        }
+    }
+
+    private void SelectIcon(LucideIconModel icon)
+    {
+        SelectedIcon = icon;
+        IsDrawerOpen = true;
+    }
+
+    private async Task CopyComponentTag(LucideIconModel icon)
+    {
+        var code = $"<Lucide{icon.PascalName} Size=\"{GlobalSize}\" />";
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", code);
+        ShowToast(I18n.T("Toast.CopiedTag", icon.PascalName));
+    }
+
+    private async Task CopyName(LucideIconModel icon)
+    {
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", icon.Name);
+        ShowToast(I18n.T("Toast.CopiedName", icon.Name));
+    }
+
+    private async Task CopySvg(LucideIconModel icon)
+    {
+        var code = $"<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{GlobalSize}\" height=\"{GlobalSize}\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"{GlobalColor}\" stroke-width=\"{GlobalStroke}\" stroke-linecap=\"round\" stroke-linejoin=\"round\">{icon.SvgMarkup}</svg>";
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", code);
+        ShowToast(I18n.T("Toast.CopiedSvg", icon.Name));
+    }
+
+    private void ShowToast(string message)
+    {
+        ToastMessage = message;
+        _toastCts?.Cancel();
+        _toastCts = new System.Threading.CancellationTokenSource();
+        var token = _toastCts.Token;
+
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(2500, token);
+            if (!token.IsCancellationRequested)
+            {
+                await InvokeAsync(() =>
+                {
+                    ToastMessage = null;
+                    StateHasChanged();
+                });
+            }
+        }, token);
+    }
+
+    public void Dispose()
+    {
+        I18n.OnLanguageChanged -= HandleLanguageChanged;
+    }
+}

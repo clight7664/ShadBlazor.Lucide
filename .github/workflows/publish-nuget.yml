@@ -74,6 +74,8 @@ jobs:
         if: ${{ github.event.inputs.dry_run != 'true' }}
         uses: NuGet/login@v1
         id: nuget-login
+        with:
+          user: 'clight'
 
       - name: Push to NuGet.org
         if: ${{ github.event.inputs.dry_run != 'true' }}

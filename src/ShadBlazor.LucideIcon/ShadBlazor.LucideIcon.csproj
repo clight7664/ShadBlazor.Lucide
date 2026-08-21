@@ -6,9 +6,11 @@
     <Version>1.33.0</Version>
     <Description>Lucide icons library for Blazor supporting .NET 6.0+, .NET 8.0, and .NET 9.0.</Description>
     <PackageTags>blazor;lucide;icons;shadcn;svg;dotnet6;dotnet8;dotnet9</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
     <SupportedPlatform Include="browser" />
   </ItemGroup>
 

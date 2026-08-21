@@ -5,7 +5,8 @@
     <LangVersion>latest</LangVersion>
     <Authors>ShadBlazor Team</Authors>
     <Company>ShadBlazor</Company>
-    <RepositoryUrl>https://github.com/ShadBlazor/ShadBlazor.LucideIcon</RepositoryUrl>
+    <RepositoryUrl>https://github.com/clight7664/ShadBlazor.Lucide</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/clight7664/ShadBlazor.Lucide</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 </Project>

@@ -987,33 +987,52 @@ input:checked + .toggle-slider:before {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  position: sticky;
+  top: 75px;
+  align-self: flex-start;
 }
 
 .guide-nav-section h4 {
   font-size: 0.85rem;
+  font-weight: 700;
   text-transform: uppercase;
   color: var(--text-muted);
   margin: 0 0 0.5rem 0;
+  letter-spacing: 0.05em;
 }
 
 .guide-nav-link {
   display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
   color: var(--text-muted);
-  text-decoration: none;
   font-size: 0.9rem;
-  padding: 0.25rem 0;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
 }
 
 .guide-nav-link.active, .guide-nav-link:hover {
   color: var(--accent-color);
+  background: var(--bg-card-hover);
+  font-weight: 500;
 }
 
 .guide-article {
   flex: 1;
+  min-width: 0;
 }
 
-.guide-article h1 { font-size: 2.5rem; margin-top: 0; }
-.guide-article h2 { font-size: 1.75rem; margin-top: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
+.guide-article h1, .guide-article h2, .guide-article h3 {
+  scroll-margin-top: 80px;
+}
+
+.guide-article h1 { font-size: 2.2rem; margin-top: 0; }
+.guide-article h2 { font-size: 1.6rem; margin-top: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
+.guide-article h3 { font-size: 1.2rem; margin-top: 1.25rem; }
 .guide-article p.lead { font-size: 1.15rem; color: var(--text-muted); line-height: 1.6; }
 
 .code-block {

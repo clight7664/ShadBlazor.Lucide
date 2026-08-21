@@ -1,0 +1,62 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Publish Blazor WASM Docs
+        run: dotnet publish samples/ShadBlazor.LucideIcon.Docs/ShadBlazor.LucideIcon.Docs.csproj -c Release -f net9.0 -o release-output
+
+      - name: Configure Base Path and SPA 404 for GitHub Pages
+        shell: pwsh
+        run: |
+          $indexPath = "release-output/wwwroot/index.html"
+          $content = Get-Content $indexPath -Raw
+          # Update base href for repository subpath
+          $content = $content -replace '<base href="/" />', '<base href="/ShadBlazor.Lucide/" />'
+          Set-Content -Path $indexPath -Value $content -NoNewline
+          
+          # Copy to 404.html for client-side routing on GitHub Pages
+          Copy-Item -Path $indexPath -Destination "release-output/wwwroot/404.html" -Force
+          
+          # Add .nojekyll to prevent Jekyll from bypassing _framework directory
+          New-Item -Path "release-output/wwwroot/.nojekyll" -ItemType File -Force
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'release-output/wwwroot'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

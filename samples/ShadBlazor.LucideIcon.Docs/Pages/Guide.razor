@@ -1,59 +1,127 @@
 @page "/guide"
 @using ShadBlazor.LucideIcon
+@using ShadBlazor.LucideIcon.Docs.Services
+@inject I18nService I18n
+@inject IJSRuntime JS
+@implements IDisposable
 
-<PageTitle>Guide & Documentation - ShadBlazor.LucideIcon</PageTitle>
+<PageTitle>@I18n.T("Guide.Title") - ShadBlazor.LucideIcon</PageTitle>
 
 <div class="guide-container">
     <aside class="guide-sidebar">
         <div class="guide-nav-section">
-            <h4>Introduction</h4>
-            <a href="#what-is-lucide" class="guide-nav-link active">What is Lucide?</a>
-            <a href="#version-1" class="guide-nav-link">Version 1.0</a>
-            <a href="#installation" class="guide-nav-link">Installation</a>
+            <h4>@I18n.T("Guide.Nav.Intro")</h4>
+            <button type="button" class="guide-nav-link @(ActiveSection == "what-is-lucide" ? "active" : "")" @onclick='() => ScrollToSection("what-is-lucide")'>
+                @I18n.T("Guide.Nav.WhatIs")
+            </button>
+            <button type="button" class="guide-nav-link @(ActiveSection == "installation" ? "active" : "")" @onclick='() => ScrollToSection("installation")'>
+                @I18n.T("Guide.Nav.Installation")
+            </button>
         </div>
 
         <div class="guide-nav-section">
-            <h4>Basics</h4>
-            <a href="#color" class="guide-nav-link">Color</a>
-            <a href="#sizing" class="guide-nav-link">Sizing</a>
-            <a href="#stroke-width" class="guide-nav-link">Stroke width</a>
+            <h4>@I18n.T("Guide.Nav.Basics")</h4>
+            <button type="button" class="guide-nav-link @(ActiveSection == "basics" ? "active" : "")" @onclick='() => ScrollToSection("basics")'>
+                @I18n.T("Guide.Nav.StrongTyped")
+            </button>
+            <button type="button" class="guide-nav-link @(ActiveSection == "dynamic" ? "active" : "")" @onclick='() => ScrollToSection("dynamic")'>
+                @I18n.T("Guide.Nav.Dynamic")
+            </button>
         </div>
 
         <div class="guide-nav-section">
-            <h4>Advanced</h4>
-            <a href="#tailwind" class="guide-nav-link">Tailwind / Shadcn Styling</a>
-            <a href="#dynamic" class="guide-nav-link">Dynamic Component</a>
-            <a href="#accessibility" class="guide-nav-link">Accessibility</a>
+            <h4>@I18n.T("Guide.Nav.Advanced")</h4>
+            <button type="button" class="guide-nav-link @(ActiveSection == "tailwind" ? "active" : "")" @onclick='() => ScrollToSection("tailwind")'>
+                @I18n.T("Guide.Nav.Tailwind")
+            </button>
+            <button type="button" class="guide-nav-link @(ActiveSection == "nuget-publish" ? "active" : "")" @onclick='() => ScrollToSection("nuget-publish")'>
+                @I18n.T("Guide.Nav.NugetPublish")
+            </button>
         </div>
     </aside>
 
     <article class="guide-article">
-        <h1 id="what-is-lucide">What is ShadBlazor.LucideIcon?</h1>
+        <h1 id="what-is-lucide">@I18n.T("Guide.Nav.WhatIs")</h1>
         <p class="lead">
-            ShadBlazor.LucideIcon 是针对 Blazor 生态封装的高性能矢量图标库，提供超过 1,770+ 个高度一致且精美的矢量图标。
-            最低支持 <strong>.NET 6.0</strong>，同时完美兼容 <strong>.NET 7.0 / 8.0 / 9.0</strong>。
+            @I18n.T("Guide.Lead")
         </p>
 
-        <h2 id="installation">Installation</h2>
-        <p>通过 NuGet 包管理器安装核心库：</p>
+        <h2 id="installation">@I18n.T("Guide.Install.Title")</h2>
+        <p>@I18n.T("Guide.Install.Desc")</p>
         <pre class="code-block"><code>dotnet add package ShadBlazor.LucideIcon</code></pre>
 
-        <p>在 <code>_Imports.razor</code> 中引入命名空间：</p>
+        <p>@I18n.T("Guide.Install.ImportsDesc")</p>
         <pre class="code-block"><code>@@using ShadBlazor.LucideIcon
 @@using ShadBlazor.LucideIcon.Base</code></pre>
 
-        <h2 id="basics">Usage & Basics</h2>
-        <h3>1. 强类型组件使用</h3>
+        <h2 id="basics">@I18n.T("Guide.Basics.Title")</h2>
+        <h3>@I18n.T("Guide.Basics.StrongTitle")</h3>
         <pre class="code-block"><code>&lt;LucideCamera Size="24" Color="currentColor" StrokeWidth="2" /&gt;
 &lt;LucideCheck Size="20" Color="#10b981" /&gt;
 &lt;LucideSparkles Size="24" Class="text-rose-500 animate-spin" /&gt;</code></pre>
 
-        <h3>2. 动态组件使用（适用于数据库配置菜单）</h3>
+        <h3 id="dynamic">@I18n.T("Guide.Basics.DynamicTitle")</h3>
         <pre class="code-block"><code>&lt;LucideIcon Name="camera" Size="24" /&gt;
 &lt;LucideIcon Icon="LucideIconName.Settings" Size="20" /&gt;</code></pre>
 
-        <h2 id="tailwind">Tailwind CSS & Shadcn 深度集成</h2>
-        <p>直接通过 <code>Class</code> 参数传递 Tailwind CSS 工具类，尺寸与颜色将自动与样式系统融合：</p>
+        <h2 id="tailwind">@I18n.T("Guide.Tailwind.Title")</h2>
+        <p>@I18n.T("Guide.Tailwind.Desc")</p>
         <pre class="code-block"><code>&lt;LucideSearch Class="w-4 h-4 text-muted-foreground mr-2" /&gt;</code></pre>
+
+        <h2 id="nuget-publish">@I18n.T("Guide.Nuget.Title")</h2>
+        
+        <h3>@I18n.T("Guide.Nuget.Step1")</h3>
+        <p>@I18n.T("Guide.Nuget.Step1Desc")</p>
+        <pre class="code-block"><code>&lt;PropertyGroup&gt;
+  &lt;Version&gt;1.33.0&lt;/Version&gt;
+  &lt;Authors&gt;ShadBlazor Team&lt;/Authors&gt;
+  &lt;RepositoryUrl&gt;https://github.com/clight7664/ShadBlazor.Lucide&lt;/RepositoryUrl&gt;
+&lt;/PropertyGroup&gt;</code></pre>
+
+        <h3>@I18n.T("Guide.Nuget.Step2")</h3>
+        <p>@I18n.T("Guide.Nuget.Step2Desc")</p>
+        <pre class="code-block"><code>dotnet build -c Release
+dotnet test tests/ShadBlazor.LucideIcon.Tests/ShadBlazor.LucideIcon.Tests.csproj -c Release</code></pre>
+
+        <h3>@I18n.T("Guide.Nuget.Step3")</h3>
+        <p>@I18n.T("Guide.Nuget.Step3Desc")</p>
+        <pre class="code-block"><code>dotnet pack src/ShadBlazor.LucideIcon/ShadBlazor.LucideIcon.csproj -c Release -o ./artifacts</code></pre>
+
+        <h3>@I18n.T("Guide.Nuget.Step4")</h3>
+        <p>@I18n.T("Guide.Nuget.Step4Desc")</p>
+        <pre class="code-block"><code>dotnet nuget push ./artifacts/ShadBlazor.LucideIcon.*.nupkg --api-key &lt;YOUR_API_KEY&gt; --source https://api.nuget.org/v3/index.json --skip-duplicate</code></pre>
+
+        <h3>@I18n.T("Guide.Nuget.Step5")</h3>
+        <p>@I18n.T("Guide.Nuget.Step5Desc")</p>
+        <pre class="code-block"><code># PowerShell 脚本一键发布
+./scripts/publish-nuget.ps1 -ApiKey "oy2..."
+
+# 仅打包测试（不推送到源）
+./scripts/publish-nuget.ps1 -SkipPush</code></pre>
     </article>
 </div>
+
+@code {
+    private string ActiveSection = "what-is-lucide";
+
+    protected override void OnInitialized()
+    {
+        I18n.OnLanguageChanged += HandleLanguageChanged;
+    }
+
+    private void HandleLanguageChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ScrollToSection(string elementId)
+    {
+        ActiveSection = elementId;
+        await JS.InvokeVoidAsync("eval", $"document.getElementById('{elementId}')?.scrollIntoView({{ behavior: 'smooth', block: 'start' }})");
+    }
+
+    public void Dispose()
+    {
+        I18n.OnLanguageChanged -= HandleLanguageChanged;
+    }
+}

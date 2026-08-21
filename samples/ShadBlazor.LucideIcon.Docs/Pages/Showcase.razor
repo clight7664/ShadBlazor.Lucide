@@ -1,12 +1,15 @@
 @page "/showcase"
 @using ShadBlazor.LucideIcon
+@using ShadBlazor.LucideIcon.Docs.Services
+@inject I18nService I18n
+@implements IDisposable
 
-<PageTitle>Showcase - ShadBlazor.LucideIcon</PageTitle>
+<PageTitle>@I18n.T("Showcase.Title") - ShadBlazor.LucideIcon</PageTitle>
 
 <div class="showcase-container">
     <div class="hero-section" style="padding-top: 2rem;">
-        <h1 class="hero-title">Showcase</h1>
-        <p class="hero-desc">由开发者社区基于 ShadBlazor 与 Lucide Icons 构建的优秀项目</p>
+        <h1 class="hero-title">@I18n.T("Showcase.Title")</h1>
+        <p class="hero-desc">@I18n.T("Showcase.Desc")</p>
     </div>
 
     <div class="showcase-grid">
@@ -15,8 +18,8 @@
                 <LucideSparkles Size="48" Color="#ffffff" />
             </div>
             <div class="showcase-content">
-                <h3>ShadBlazor Admin Pro</h3>
-                <p>基于 Tailwind CSS 与 Lucide 图标打造的企业级极简后台管理系统。</p>
+                <h3>@I18n.T("Showcase.Admin.Title")</h3>
+                <p>@I18n.T("Showcase.Admin.Desc")</p>
             </div>
         </div>
 
@@ -25,9 +28,26 @@
                 <LucideShield Size="48" Color="#ffffff" />
             </div>
             <div class="showcase-content">
-                <h3>Lucide Blazor Canvas</h3>
-                <p>在线可交互式矢量图元编辑器与图标设计工具。</p>
+                <h3>@I18n.T("Showcase.Canvas.Title")</h3>
+                <p>@I18n.T("Showcase.Canvas.Desc")</p>
             </div>
         </div>
     </div>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        I18n.OnLanguageChanged += HandleLanguageChanged;
+    }
+
+    private void HandleLanguageChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        I18n.OnLanguageChanged -= HandleLanguageChanged;
+    }
+}

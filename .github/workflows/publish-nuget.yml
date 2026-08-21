@@ -33,6 +33,7 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: |
+            6.0.x
             8.0.x
             9.0.x
 
@@ -47,8 +48,10 @@ jobs:
             dotnet build ShadBlazor.Lucide.sln -c Release
           fi
 
-      - name: Run unit tests
-        run: dotnet test tests/ShadBlazor.LucideIcon.Tests/ShadBlazor.LucideIcon.Tests.csproj -c Release --no-build
+      - name: Run unit tests (.NET 8 & 9)
+        run: |
+          dotnet test tests/ShadBlazor.LucideIcon.Tests/ShadBlazor.LucideIcon.Tests.csproj -c Release -f net8.0 --no-build
+          dotnet test tests/ShadBlazor.LucideIcon.Tests/ShadBlazor.LucideIcon.Tests.csproj -c Release -f net9.0 --no-build
 
       - name: Pack NuGet package
         run: |
@@ -76,6 +79,7 @@ jobs:
         if: ${{ github.event.inputs.dry_run != 'true' }}
         run: |
           for pkg in artifacts/*.nupkg; do
+            echo "Pushing $pkg to NuGet.org via Trusted Publishing..."
             dotnet nuget push "$pkg" \
               --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY || secrets.NUGET_API_KEY }}" \
               --source https://api.nuget.org/v3/index.json \

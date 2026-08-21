@@ -975,55 +975,92 @@ input:checked + .toggle-slider:before {
 /* Guide Page */
 .guide-container {
   display: flex;
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
-  gap: 3rem;
+  padding: 2rem 2.5rem;
+  gap: 3.5rem;
+  position: relative;
 }
 
 .guide-sidebar {
-  width: 240px;
+  width: 250px;
   flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
   position: sticky;
   top: 75px;
-  align-self: flex-start;
+  height: calc(100vh - 95px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  padding-right: 1.25rem;
+  border-right: 1px solid var(--border-color);
+}
+
+.guide-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.guide-sidebar::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+.guide-nav-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .guide-nav-section h4 {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   font-weight: 700;
   text-transform: uppercase;
   color: var(--text-muted);
   margin: 0 0 0.5rem 0;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
+  padding-left: 0.75rem;
 }
 
 .guide-nav-link {
   display: block;
   width: 100%;
   text-align: left;
-  background: transparent;
-  border: none;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
   color: var(--text-muted);
-  font-size: 0.9rem;
-  padding: 0.35rem 0.5rem;
-  border-radius: 6px;
+  font-size: 0.88rem;
+  padding: 0.35rem 0.75rem;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: color 0.15s ease, border-color 0.15s ease;
+  text-decoration: none;
+  border-left: 2px solid transparent !important;
+  border-radius: 0 !important;
+  line-height: 1.45;
 }
 
-.guide-nav-link.active, .guide-nav-link:hover {
-  color: var(--accent-color);
-  background: var(--bg-card-hover);
-  font-weight: 500;
+.guide-nav-link:hover {
+  color: var(--text-main) !important;
+  background: transparent !important;
+  text-decoration: underline !important;
+  text-underline-offset: 4px;
+  border-left-color: var(--border-color) !important;
+}
+
+.guide-nav-link.active {
+  color: var(--accent-color) !important;
+  background: transparent !important;
+  font-weight: 600;
+  text-decoration: underline !important;
+  text-underline-offset: 4px;
+  border-left-color: var(--accent-color) !important;
 }
 
 .guide-article {
   flex: 1;
   min-width: 0;
+  padding-bottom: 4rem;
 }
 
 .guide-article h1, .guide-article h2, .guide-article h3 {
@@ -1031,8 +1068,8 @@ input:checked + .toggle-slider:before {
 }
 
 .guide-article h1 { font-size: 2.2rem; margin-top: 0; }
-.guide-article h2 { font-size: 1.6rem; margin-top: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
-.guide-article h3 { font-size: 1.2rem; margin-top: 1.25rem; }
+.guide-article h2 { font-size: 1.6rem; margin-top: 2.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
+.guide-article h3 { font-size: 1.15rem; margin-top: 1.25rem; }
 .guide-article p.lead { font-size: 1.15rem; color: var(--text-muted); line-height: 1.6; }
 
 .code-block {

@@ -18,6 +18,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   build-and-publish:
@@ -66,11 +67,17 @@ jobs:
           draft: false
           prerelease: false
 
+      - name: NuGet Trusted Publishing Login
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        uses: NuGet/login@v1
+        id: nuget-login
+
       - name: Push to NuGet.org
-        if: ${{ github.event.inputs.dry_run != 'true' && env.NUGET_API_KEY != '' }}
-        env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        if: ${{ github.event.inputs.dry_run != 'true' }}
         run: |
           for pkg in artifacts/*.nupkg; do
-            dotnet nuget push "$pkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
+            dotnet nuget push "$pkg" \
+              --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY || secrets.NUGET_API_KEY }}" \
+              --source https://api.nuget.org/v3/index.json \
+              --skip-duplicate
           done
